@@ -25,13 +25,37 @@ router.get("/", async (req, res) => {
 
 router.post("/", middleware, async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { id, name, email, education, skills, links } = req.body;
 
-    // Try to update existing profile, or create if doesn't exist
-    const profile = await prisma.profile.upsert({
-      where: { email: email || "unique-default" },
-      update: { name, email },
-      create: { name, email },
+    // Update existing profile by ID
+    const profile = await prisma.profile.update({
+      where: { id },
+      data: {
+        name,
+        email,
+        education: education ? {
+          deleteMany: {},
+          create: education.map((ed: any) => ({
+            degree: ed.degree,
+            institution: ed.institution,
+            startYear: parseInt(ed.startYear) || new Date(ed.startDate).getFullYear(),
+            endYear: ed.endYear ? parseInt(ed.endYear) : (ed.endDate ? new Date(ed.endDate).getFullYear() : null),
+          })),
+        } : undefined,
+        skills: skills ? {
+          deleteMany: {},
+          create: skills.map((skill: string) => ({
+            name: skill,
+          })),
+        } : undefined,
+        links: links ? {
+          deleteMany: {},
+          create: Object.entries(links).map(([type, url]: [string, any]) => ({
+            type,
+            url,
+          })),
+        } : undefined,
+      },
       include: {
         education: true,
         skills: true,
