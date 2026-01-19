@@ -70,7 +70,6 @@ router.post("/", middleware, async (req, res) => {
 
 /**
  * POST /projects/from-github (protected)
- * Create a project from GitHub URL
  * Body: { githubUrl: "https://github.com/username/repo", profileId: "..." }
  */
 router.post("/from-github", middleware, async (req, res) => {
