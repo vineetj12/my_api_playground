@@ -149,42 +149,6 @@ const Profile = () => {
               className="edit-input"
             />
           </div>
-          <div className="form-group">
-            <label>GitHub</label>
-            <input
-              type="url"
-              value={editedProfile.links.github}
-              onChange={(e) => setEditedProfile(prev => prev ? {
-                ...prev,
-                links: { ...prev.links, github: e.target.value }
-              } : null)}
-              className="edit-input"
-            />
-          </div>
-          <div className="form-group">
-            <label>LinkedIn</label>
-            <input
-              type="url"
-              value={editedProfile.links.linkedin}
-              onChange={(e) => setEditedProfile(prev => prev ? {
-                ...prev,
-                links: { ...prev.links, linkedin: e.target.value }
-              } : null)}
-              className="edit-input"
-            />
-          </div>
-          <div className="form-group">
-            <label>Portfolio</label>
-            <input
-              type="url"
-              value={editedProfile.links.portfolio}
-              onChange={(e) => setEditedProfile(prev => prev ? {
-                ...prev,
-                links: { ...prev.links, portfolio: e.target.value }
-              } : null)}
-              className="edit-input"
-            />
-          </div>
         </div>
       ) : (
         <>
