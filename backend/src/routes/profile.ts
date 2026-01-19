@@ -31,7 +31,24 @@ router.post("/", middleware, async (req, res) => {
       return res.status(400).json({ error: "Profile ID is required" });
     }
 
-    // Step 1: Delete related records first
+    // Step 1: Get all skills for this profile to delete ProjectSkill references
+    const existingSkills = await prisma.skill.findMany({
+      where: { profileId: id },
+      select: { id: true }
+    });
+
+    // Delete ProjectSkill records that reference these skills
+    if (existingSkills.length > 0) {
+      await prisma.projectSkill.deleteMany({
+        where: {
+          skillId: {
+            in: existingSkills.map(s => s.id)
+          }
+        }
+      });
+    }
+
+    // Step 2: Delete related records
     await prisma.education.deleteMany({
       where: { profileId: id }
     });
@@ -42,13 +59,13 @@ router.post("/", middleware, async (req, res) => {
       where: { profileId: id }
     });
 
-    // Step 2: Build update data for profile fields only
+    // Step 3: Build update data for profile fields only
     const updateData: any = {};
     
     if (name) updateData.name = name;
     if (email) updateData.email = email;
 
-    // Step 3: Update profile with just the basic fields
+    // Step 4: Update profile with just the basic fields
     const profile = await prisma.profile.update({
       where: { id },
       data: updateData,
@@ -60,7 +77,7 @@ router.post("/", middleware, async (req, res) => {
       },
     });
 
-    // Step 4: Create education records
+    // Step 5: Create education records
     if (education && Array.isArray(education) && education.length > 0) {
       const eduData = education.map((ed: any) => {
         let startYear = ed.startYear;
@@ -90,7 +107,7 @@ router.post("/", middleware, async (req, res) => {
       });
     }
 
-    // Step 5: Create skill records
+    // Step 6: Create skill records
     if (skills && Array.isArray(skills) && skills.length > 0) {
       const skillsToCreate = skills
         .map((skill: any) => {
@@ -116,7 +133,7 @@ router.post("/", middleware, async (req, res) => {
       }
     }
 
-    // Step 6: Create link records
+    // Step 7: Create link records
     if (links && typeof links === 'object') {
       const linkEntries = Object.entries(links)
         .filter(([_, value]: [string, any]) => {
@@ -141,7 +158,7 @@ router.post("/", middleware, async (req, res) => {
       }
     }
 
-    // Step 7: Fetch and return updated profile with all relations
+    // Step 8: Fetch and return updated profile with all relations
     const updatedProfile = await prisma.profile.findUnique({
       where: { id },
       include: {
