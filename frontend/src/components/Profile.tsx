@@ -56,12 +56,15 @@ const Profile = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}: Failed to save profile`);
       }
 
       const data = await response.json();
       setProfile(data);
+      setEditedProfile(data);
       setIsEditing(false);
+      setError(null);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to save profile';
       setError(message);
